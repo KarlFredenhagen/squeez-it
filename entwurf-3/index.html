@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stressball gestalten</title>
+<style>
+:root {
+  --bg: #fff; --text: #1d1d1f; --muted: #6e6e73; --chip: rgba(0,0,0,.05); --line: rgba(0,0,0,.1);
+  --accent: #0071e3; --err: #d70015; --glass: rgba(255,255,255,.78); --glow: #ff3b30;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body { margin: 0; overflow-x: hidden; background: var(--bg); color: var(--text);
+  font: 100%/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased;
+  display: flex; flex-direction: column; min-height: 100%; }
+body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .22;
+  background: radial-gradient(circle at 50% 34%, var(--glow), transparent 55%); transition: background 500ms; }
+
+header { padding: 1.25rem 1.25rem 0; text-align: center; }
+.brand { font-weight: 700; letter-spacing: -.01em; }
+h1 { margin: .5rem 0 0; font-size: clamp(2rem, 8vw, 3.4rem); line-height: 1.04; letter-spacing: -.035em; }
+.sub { margin: .4rem 0 0; color: var(--muted); }
+
+.stage { flex: 1; display: grid; place-items: center; align-content: center; padding: 1rem 0; min-height: 300px; }
+.squish { width: min(64vw, 46vh, 340px); aspect-ratio: 1; cursor: grab; touch-action: none; user-select: none; -webkit-user-select: none;
+  -webkit-touch-callout: none; transform-origin: 50% 88%; will-change: transform; }
+.squish:active { cursor: grabbing; }
+.squish:focus-visible { outline: 3px solid var(--accent); outline-offset: 8px; border-radius: 24px; }
+.squish svg { display: block; width: 100%; height: 100%; pointer-events: none; }
+.shadow { width: min(40vw, 30vh, 210px); height: 18px; margin-top: -6px; border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(0,0,0,.28), transparent); will-change: transform; }
+.count { margin-top: .75rem; color: var(--muted); font-size: .9rem; min-height: 1.5em; font-variant-numeric: tabular-nums; }
+
+.sheet { width: min(100%, 640px); margin: 0 auto; padding: 1rem 1rem calc(1rem + env(safe-area-inset-bottom));
+  border-radius: 28px 28px 0 0; border-top: 1px solid var(--line);
+  background: var(--glass); -webkit-backdrop-filter: blur(30px) saturate(180%); backdrop-filter: blur(30px) saturate(180%); }
+
+.tabs { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 3px; padding: 3px; border-radius: 12px; background: var(--chip); }
+.opt { position: relative; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.opt input { position: absolute; inset: 0; margin: 0; opacity: 0; cursor: pointer; }
+.opt span { display: grid; place-items: center; transition: transform 100ms ease-out, background 150ms, box-shadow 150ms; }
+.opt:active span { transform: scale(.95); }
+.opt input:focus-visible + span { outline: 3px solid var(--accent); outline-offset: 2px; }
+.tabs .opt span { padding: .45rem .25rem; border-radius: 9px; font-size: .92rem; font-weight: 600; color: var(--muted); }
+.tabs input:checked + span { background: #fff; color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+
+.panel { min-height: 92px; margin: .9rem 0; display: flex; align-items: center; }
+.panel[hidden] { display: none; }
+.row { display: flex; gap: .6rem; overflow-x: auto; padding: 4px; scrollbar-width: none; scroll-snap-type: x proximity; }
+.row::-webkit-scrollbar { display: none; }
+.row .opt { flex: none; scroll-snap-align: start; }
+.chips .opt span { width: 76px; padding: .5rem .25rem .4rem; gap: .1rem; border-radius: 16px; background: var(--chip); font-size: .8rem; }
+.chips .opt svg { width: 42px; height: 42px; }
+.chips input:checked + span { background: #fff; box-shadow: inset 0 0 0 2px var(--accent); }
+.dots .opt span { padding: 4px; border-radius: 50%; }
+.dots i { width: 40px; height: 40px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); }
+.dots input:checked + span { box-shadow: 0 0 0 2px var(--accent); }
+
+.field { display: grid; gap: .3rem; width: 100%; }
+.field + .field { margin-top: .9rem; }
+.field label { font-size: .9rem; font-weight: 500; }
+.lab { display: flex; justify-content: space-between; align-items: baseline; }
+.hint { color: var(--muted); font-size: .85rem; }
+.err { color: var(--err); font-size: .85rem; }
+.err:empty { display: none; }
+input:not([type=radio]) { width: 100%; font: inherit; font-size: 1.0625rem; color: inherit; background: #f5f5f7;
+  border: 1px solid var(--line); border-radius: 14px; padding: .8rem 1rem; outline: none; transition: border-color 150ms, box-shadow 150ms; }
+input:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(0,113,227,.2); }
+input[aria-invalid=true] { border-color: var(--err); }
+
+.btn { width: 100%; border: 0; border-radius: 16px; padding: 1rem; background: var(--text); color: #fff; font: inherit;
+  font-size: 1.0625rem; font-weight: 700; cursor: pointer; transition: transform 100ms ease-out, filter 150ms; }
+.btn:active { transform: scale(.98); filter: brightness(.85); }
+.btn:focus-visible, .round:focus-visible, .x:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+
+/* Bestell-Sheet: kommt von unten, geht nach unten */
+dialog { width: min(100%, 640px); max-width: 100%; max-height: 92vh; margin: auto auto 0; padding: 0; border: 0;
+  border-radius: 28px 28px 0 0; background: #fff; color: var(--text); }
+dialog::backdrop { background: rgba(0,0,0,.3); }
+dialog[open] { animation: up 420ms cubic-bezier(.2,.9,.25,1); }
+dialog.closing { animation: down 260ms cubic-bezier(.4,0,1,1) forwards; }
+@keyframes up   { from { transform: translateY(100%); } }
+@keyframes down { to   { transform: translateY(100%); } }
+.grip { width: 36px; height: 5px; margin: .5rem auto 0; border-radius: 3px; background: rgba(0,0,0,.18); }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; padding: .5rem 1.25rem 0; }
+.sheet-head h2 { margin: 0; font-size: 1.5rem; letter-spacing: -.02em; }
+.x { width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(0,0,0,.06); color: var(--text); font-size: 1.1rem; cursor: pointer; }
+.sheet-body { padding: 1rem 1.25rem calc(1.25rem + env(safe-area-inset-bottom)); }
+.mini { display: flex; align-items: center; gap: 1rem; padding: .75rem; margin-bottom: 1.25rem; border-radius: 18px; background: #f5f5f7; }
+.mini .ball { width: 64px; height: 64px; flex: none; }
+.mini p { margin: 0; line-height: 1.3; }
+.qty { display: flex; align-items: center; justify-content: space-between; margin: 1.25rem 0; }
+.stepper { display: flex; align-items: center; gap: .5rem; }
+.stepper input { width: 4.5rem; text-align: center; }
+.round { width: 40px; height: 40px; border: 0; border-radius: 50%; background: rgba(0,0,0,.06); color: var(--text); font-size: 1.3rem; cursor: pointer; transition: transform 100ms ease-out; }
+.round:active { transform: scale(.9); }
+.thanks { text-align: center; }
+.thanks .ball { width: 150px; height: 150px; margin: 0 auto; }
+.summary { display: grid; grid-template-columns: auto 1fr; gap: .4rem 1rem; text-align: left; margin: 1rem 0; }
+.summary dt { color: var(--muted); }
+.summary dd { margin: 0; overflow-wrap: anywhere; }
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+  dialog[open] { animation: fade 200ms; }
+  dialog.closing { animation: fadeout 150ms forwards; }
+  @keyframes fade { from { opacity: 0; } }
+  @keyframes fadeout { to { opacity: 0; } }
+}
+@media (prefers-reduced-transparency: reduce) { .sheet { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand" id="brand"></div>
+  <h1>Drück mal drauf.</h1>
+  <p class="sub">Dann mach ihn zu deinem.</p>
+</header>
+
+<div class="stage">
+  <div class="squish" id="squish" tabindex="0"><div id="ball"></div></div>
+  <div class="shadow" id="shadow"></div>
+  <div class="count" id="count" aria-live="polite"></div>
+</div>
+
+<div class="sheet">
+  <div class="tabs" id="tabs">
+    <label class="opt"><input type="radio" name="tab" value="shape" checked><span>Form</span></label>
+    <label class="opt"><input type="radio" name="tab" value="fill"><span>Schleim</span></label>
+    <label class="opt"><input type="radio" name="tab" value="size"><span>Größe</span></label>
+  </div>
+  <div class="panel" data-tab="shape"><div class="row chips" id="shapes"></div></div>
+  <div class="panel" data-tab="fill" hidden><div class="row dots" id="fills"></div></div>
+  <div class="panel" data-tab="size" hidden><div class="row chips" id="sizes"></div></div>
+  <button class="btn" id="open" type="button">Weiter zur Bestellung</button>
+</div>
+
+<dialog id="sheet" aria-labelledby="sheetTitle">
+  <div class="grip"></div>
+  <div class="sheet-head"><h2 id="sheetTitle">Bestellung</h2><button type="button" class="x" id="close" aria-label="Schließen">✕</button></div>
+  <div class="sheet-body" id="orderBody">
+    <div class="mini"><div class="ball" id="miniBall"></div><p id="miniText"></p></div>
+    <div class="field">
+      <label for="name">Vollständiger Name</label>
+      <input id="name" name="name" type="text" autocomplete="name" aria-describedby="e-name">
+      <span class="err" id="e-name" data-err="name"></span>
+    </div>
+    <div class="field">
+      <label for="phone">Telefonnummer</label>
+      <input id="phone" name="phone" type="tel" autocomplete="tel" aria-describedby="e-phone e-contact">
+      <span class="err" id="e-phone" data-err="phone"></span>
+    </div>
+    <div class="field">
+      <label for="email">E-Mail</label>
+      <input id="email" name="email" type="email" autocomplete="email" aria-describedby="e-email e-contact">
+      <span class="err" id="e-email" data-err="email"></span>
+      <span class="hint">Telefon oder E-Mail genügt.</span>
+      <span class="err" id="e-contact" data-err="contact"></span>
+    </div>
+    <div class="qty">
+      <label for="qty">Anzahl</label>
+      <div class="stepper">
+        <button type="button" class="round" data-qty="-1" aria-label="Weniger">−</button>
+        <input id="qty" name="qty" type="number" inputmode="numeric">
+        <button type="button" class="round" data-qty="1" aria-label="Mehr">+</button>
+      </div>
+    </div>
+    <button class="btn" id="submit" type="button">Jetzt bestellen</button>
+  </div>
+  <div class="sheet-body thanks" id="thanks" hidden>
+    <div class="ball" id="doneBall"></div>
+    <h2>Danke!</h2>
+    <p class="hint">Wir melden uns, sobald dein Ball fertig ist.<br>Testversion – es wurde nichts gespeichert.</p>
+    <div id="doneSum"></div>
+    <button class="btn" type="button" onclick="location.reload()">Noch einen gestalten</button>
+  </div>
+</dialog>
+
+<script src="../config.js"></script>
+<script src="../shared.js"></script>
+<script>
+const o = newOrder();
+const $ = id => document.getElementById(id);
+$('brand').textContent = CONFIG.brand;
+document.title = `${CONFIG.brand} – Stressball gestalten`;
+
+function update() {
+  const hex = pick(CONFIG.fillings, o.fill).hex;
+  drawBall($('ball'), o);
+  drawBall($('miniBall'), o);
+  $('shapes').style.color = hex;
+  document.body.style.setProperty('--glow', hex);
+  const size = pick(CONFIG.sizes, o.size);
+  $('miniText').innerHTML = `<strong>${esc(o.shape)} · Schleim ${esc(o.fill)}</strong><br><span class="hint">Größe ${size.name} · ${size.cm} cm</span>`;
+}
+
+const big = CONFIG.sizes[CONFIG.sizes.length - 1].name;
+renderOptions($('shapes'), 'shape', CONFIG.shapes, o,
+  x => ballSvg({ ...o, shape: x.name, size: big }, true) + esc(x.name), update);
+renderOptions($('fills'), 'fill', CONFIG.fillings, o, x => `<i style="background:${swatch(x)}"></i>`, update);
+renderOptions($('sizes'), 'size', CONFIG.sizes, o, x => `<b>${esc(x.name)}</b>${x.cm} cm`, update);
+const form = bindFields(document, o, update);
+update();
+
+$('tabs').onchange = e => document.querySelectorAll('.panel').forEach(p => p.hidden = p.dataset.tab !== e.target.value);
+
+// ── Knautschen: Feder nach Apples Modell (Dämpfung + Response), unterbrechbar zu jedem Zeitpunkt ──
+const squish = $('squish'), shadow = $('shadow');
+const still = matchMedia('(prefers-reduced-motion: reduce)');
+let s = 0, v = 0, target = 0, damping = 1, response = .25, raf = 0, last = 0, squeezes = 0;
+
+function tick(now) {
+  const dt = Math.min((now - (last || now)) / 1000, 1 / 30) || 1 / 60;
+  last = now;
+  const k = (2 * Math.PI / response) ** 2, c = 4 * Math.PI * damping / response;
+  v += (-k * (s - target) - c * v) * dt;
+  s += v * dt;
+  const done = Math.abs(v) < .002 && Math.abs(s - target) < .002;
+  if (done) s = target;
+  squish.style.transform = `scale(${1 + .16 * s}, ${1 - .2 * s})`;
+  shadow.style.transform = `scaleX(${1 + .3 * s})`;
+  raf = done ? 0 : requestAnimationFrame(tick);
+  if (done) last = 0;
+}
+function spring(to, d, r) {
+  target = to; damping = d; response = r;
+  if (still.matches) return; // reduzierte Bewegung: kein Wackeln
+  if (!raf) raf = requestAnimationFrame(tick);
+}
+function press(e) {
+  if (e.pointerId !== undefined) squish.setPointerCapture(e.pointerId);
+  spring(1, 1, .18);          // Zusammendrücken: kritisch gedämpft, kein Überschwingen
+  navigator.vibrate?.(8);
+}
+function release() {
+  if (target !== 1) return;
+  spring(0, .38, .45);         // Loslassen: federnd, weil Energie drinsteckt
+  squeezes++;
+  $('count').textContent = squeezes === 1 ? '1× geknautscht' : `${squeezes}× geknautscht`;
+}
+squish.addEventListener('pointerdown', press);
+squish.addEventListener('pointerup', release);
+squish.addEventListener('pointercancel', release);
+squish.addEventListener('contextmenu', e => e.preventDefault());
+squish.addEventListener('keydown', e => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); press(e); } });
+squish.addEventListener('keyup', e => { if (e.key === ' ' || e.key === 'Enter') release(); });
+
+// ── Bestell-Sheet ──
+const sheet = $('sheet');
+$('open').onclick = () => sheet.showModal();
+function closeSheet() {
+  if (still.matches) return sheet.close();
+  sheet.classList.add('closing');
+  sheet.addEventListener('animationend', () => { sheet.classList.remove('closing'); sheet.close(); }, { once: true });
+}
+$('close').onclick = closeSheet;
+sheet.addEventListener('cancel', e => { e.preventDefault(); closeSheet(); });
+sheet.addEventListener('click', e => { if (e.target === sheet) closeSheet(); }); // Klick auf den Hintergrund
+
+$('submit').onclick = async () => {
+  if (!form.check()) return;
+  await submitOrder(o);
+  drawBall($('doneBall'), o);
+  $('doneSum').innerHTML = summaryHtml(o);
+  $('orderBody').hidden = true;
+  $('thanks').hidden = false;
+};
+</script>
+</body>
+</html>
