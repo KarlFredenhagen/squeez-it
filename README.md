@@ -5,9 +5,9 @@ Reine HTML-Seiten ohne Build-Schritt. Laufen auf GitHub Pages und auf jedem Webs
 | Datei | Inhalt |
 |---|---|
 | `index.html` | Übersicht der drei Entwürfe |
-| `entwurf-1/` | Konfigurator – alles auf einer Seite |
-| `entwurf-2/` | Schritt für Schritt – eine Frage pro Bildschirm |
-| `entwurf-3/` | Knautsch-Bühne – dunkel, Ball zum Drücken |
+| `entwurf-1/` | alles auf einer Seite |
+| `entwurf-2/` | eine Frage pro Bildschirm |
+| `entwurf-3/` | Ball zum Drücken |
 | `config.js` | **Alle Optionen** (Größen, Schleim-Füllungen, Formen, Stückzahl, Name) |
 | `shared.js` | Gemeinsame Logik (Vorschau, Prüfung der Eingaben, Absenden) |
 
